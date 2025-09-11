@@ -256,6 +256,25 @@ export default function App() {
   const [sumMode, setSumMode] = useState("total"); // total / avg
   const [autoMap, setAutoMap] = useState(true);
   const [darkMode, setDarkMode] = useState(true);
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 1024,
+    height: typeof window !== 'undefined' ? window.innerHeight : 768,
+  });
+
+  // 监听窗口大小变化
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const [terra, setTerra] = useState([
     // 初始空
@@ -434,9 +453,11 @@ export default function App() {
           backgroundColor: darkMode ? "rgba(147,51,234,0.8)" : "rgba(124,58,237,0.8)",
           borderColor: darkMode ? "#9333EA" : "#7C3AED",
           borderWidth: 1.5,
-          borderRadius: 8,
+          borderRadius: 6,
           borderSkipped: false,
-          barThickness: 50,  // 增加柱子宽度从30到50
+          barThickness: windowSize.width < 640 ? 25 : 40,  // 移动端25px，桌面端40px
+          categoryPercentage: 0.8,
+          barPercentage: 0.9,
           yAxisID: 'y',
         },
         {
@@ -446,14 +467,16 @@ export default function App() {
           backgroundColor: darkMode ? "rgba(16,185,129,0.8)" : "rgba(5,150,105,0.8)",
           borderColor: darkMode ? "#10B981" : "#059669",
           borderWidth: 1.5,
-          borderRadius: 8,
+          borderRadius: 6,
           borderSkipped: false,
-          barThickness: 50,  // 增加柱子宽度从30到50
+          barThickness: windowSize.width < 640 ? 25 : 40,  // 移动端25px，桌面端40px
+          categoryPercentage: 0.8,
+          barPercentage: 0.9,
           yAxisID: 'y',
         },
       ],
     };
-  }, [terraYearSums, ovYearSums, sumMode, darkMode]);
+  }, [terraYearSums, ovYearSums, sumMode, darkMode, windowSize]);
 
   const chartOptions = useMemo(
     () => ({
@@ -543,11 +566,11 @@ export default function App() {
           },
           ticks: {
             font: {
-              size: 12,
+              size: windowSize.width < 640 ? 10 : 12,  // 移动端字体更小
               weight: '500'
             },
             color: darkMode ? '#94A3B8' : '#64748B',
-            padding: 8
+            padding: windowSize.width < 640 ? 4 : 8,  // 移动端内边距更小
           },
           border: {
             display: false
@@ -565,12 +588,12 @@ export default function App() {
           ticks: {
             callback: (v) => `${sym(lang)}${fmt1(v)}`,
             font: {
-              size: 11,
+              size: windowSize.width < 640 ? 9 : 11,  // 移动端字体更小
               weight: '400'
             },
             color: darkMode ? '#94A3B8' : '#64748B',
-            padding: 12,
-            maxTicksLimit: 8
+            padding: windowSize.width < 640 ? 6 : 12,  // 移动端内边距更小
+            maxTicksLimit: windowSize.width < 640 ? 6 : 8,  // 移动端减少刻度数量
           },
           position: 'left'
         },
@@ -587,7 +610,7 @@ export default function App() {
         }
       },
     }),
-    [lang, terraYearSums, ovYearSums, sumMode, darkMode]
+    [lang, terraYearSums, ovYearSums, sumMode, darkMode, windowSize]
   );
 
   /* -------------------------- UI -------------------------- */
@@ -601,9 +624,9 @@ export default function App() {
           ? 'bg-black/95 border-neutral-800/80 shadow-lg shadow-black/40' 
           : 'bg-white/80 border-slate-200'
       }`}>
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 py-2 sm:py-3 flex flex-col sm:flex-row items-start sm:items-center gap-3">
           <div className="text-lg font-bold">{t(lang, 'title')}</div>
-          <div className="ml-auto flex items-center gap-3">
+          <div className="flex-1 w-full flex justify-between sm:justify-end items-center gap-3">
             <button
               onClick={() => setDarkMode(!darkMode)}
               className={`p-2 rounded-full transition-colors ${
@@ -638,7 +661,7 @@ export default function App() {
       </div>
 
       {/* 内容区 */}
-      <div className="max-w-7xl mx-auto p-4 space-y-4">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4 space-y-4">
         {/* 上半部分：Terra 和 图表 */}
         <div className="grid lg:grid-cols-[400px_1fr] gap-4">
           {/* 左：Terra & 模板 */}
@@ -661,14 +684,25 @@ export default function App() {
             <Card className={`p-4 flex-1 flex flex-col ${themeStyles.card}`} glow={darkMode} darkMode={darkMode}>
               <div className="flex items-center justify-between">
                 <div className={`text-base font-semibold ${themeStyles.text}`}>{t(lang, 'terraCombo')}</div>
-                <label className={`inline-flex items-center gap-2 text-sm ${themeStyles.textMuted}`}>
-                  <input type="checkbox" checked={autoMap} onChange={(e) => setAutoMap(e.target.checked)} />
-                  {t(lang, 'autoMatch')}
+                <label className={`flex items-center gap-2 p-1 rounded transition-colors ${
+                  darkMode ? 'hover:bg-neutral-700/40' : 'hover:bg-slate-100'
+                }`}>
+                  <input 
+                    type="checkbox" 
+                    checked={autoMap} 
+                    onChange={(e) => setAutoMap(e.target.checked)}
+                    className={`w-4 h-4 rounded transition-colors ${
+                      darkMode 
+                        ? 'border-neutral-600 text-violet-500 focus:ring-violet-500/50' 
+                        : 'border-slate-300 text-violet-600 focus:ring-violet-200'
+                    }`}
+                  />
+                  <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>{t(lang, 'autoMatch')}</span>
                 </label>
               </div>
 
               {/* 统一套餐 + 添加行 */}
-              <div className="grid grid-cols-3 gap-2 mt-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
                 <Field label={t(lang, 'unifiedTier')} darkMode={darkMode}>
                   <Select value={draft.bulk} onChange={(e) => setDraft((d) => ({ ...d, bulk: e.target.value }))} darkMode={darkMode}>
                     <option>BAS</option>
@@ -676,14 +710,14 @@ export default function App() {
                     <option>PRM</option>
                   </Select>
                 </Field>
-                <div className="col-span-2 flex items-end">
+                <div className="col-span-1 sm:col-span-2 flex items-end">
                   <Btn className="w-full" onClick={applyBulkTier} disabled={!terra.length} darkMode={darkMode}>
                     {t(lang, 'applyAll')}
                   </Btn>
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 mt-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-3">
                 <Field label={t(lang, 'series')} darkMode={darkMode}>
                   <Select value={draft.series} onChange={(e) => setDraft((d) => ({ ...d, series: e.target.value }))} darkMode={darkMode}>
                     {["APL", "APH", "63", "64", "65", "68", "69", "99"].map((s) => (
@@ -703,7 +737,7 @@ export default function App() {
                 </Field>
               </div>
 
-              <div className="flex gap-2 mt-3">
+              <div className="flex flex-wrap gap-2 mt-3">
                 <Btn onClick={addTerra} darkMode={darkMode}>{t(lang, 'addToList')}</Btn>
                 <Btn variant="ghost" onClick={clearTerra} disabled={!terra.length} darkMode={darkMode}>
                   {t(lang, 'clearTerra')}
@@ -719,7 +753,7 @@ export default function App() {
                     <motion.div
                       key={idx}
                       layout
-                      className={`grid grid-cols-[64px,80px,80px,60px,36px] gap-2 items-center p-2 rounded-xl border transition-colors ${
+                      className={`grid grid-cols-[60px,80px,80px,50px,32px] sm:grid-cols-[64px,80px,80px,60px,36px] gap-1 sm:gap-2 items-center p-2 rounded-xl border transition-colors ${
                         darkMode ? 'border-neutral-700/50 bg-neutral-800/40' : 'border-slate-200'
                       }`}
                       initial={{ opacity: 0, y: 6 }}
@@ -757,7 +791,7 @@ export default function App() {
                       <div className={`text-xs text-center ${themeStyles.textLight}`}>{it.tier}</div>
 
                       <button
-                        className={`h-8 w-8 rounded-lg border text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-colors ${
+                        className={`h-7 w-7 sm:h-8 sm:w-8 rounded-lg border text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-colors ${
                           darkMode ? 'border-neutral-700 hover:bg-rose-900/20' : 'border-slate-200 hover:bg-rose-50'
                         }`}
                         onClick={() => delTerraItem(idx)}
@@ -790,11 +824,11 @@ export default function App() {
                 </div>
               </div>
 
-              <div className="mt-6 h-[450px] relative">
+              <div className="mt-4 sm:mt-6 h-[300px] sm:h-[400px] lg:h-[450px] relative">
                 <Chart type="bar" data={chartData} options={chartOptions} />
               </div>
 
-              <div className="mt-4 grid grid-cols-4 gap-3">
+              <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
                 {YEARS.map((y) => (
                   <motion.div
                     key={y}
@@ -861,7 +895,7 @@ export default function App() {
           {/* 自动 */}
           {ovMode === "auto" && (
             <div className="space-y-3">
-              <div className="grid grid-cols-6 gap-3 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-end">
                 <Field label={t(lang, 'nodeLabel')} darkMode={darkMode}>
                   <Input
                     type="number"
@@ -882,46 +916,104 @@ export default function App() {
                     darkMode={darkMode}
                   />
                 </Field>
-                <div className="flex flex-col gap-1">
-                  <span className={`text-sm ${themeStyles.textMuted}`}>START-NEW</span>
-                  <label className="inline-flex items-center gap-1">
-                    <input type="checkbox" checked={ov.start} onChange={(e) => setOv({ ...ov, start: e.target.checked })} />
+                <div className="col-span-1">
+                  <label className={`flex items-center gap-2 p-1 rounded transition-colors ${
+                    darkMode ? 'hover:bg-neutral-700/40' : 'hover:bg-slate-100'
+                  }`}>
+                    <input 
+                      type="checkbox" 
+                      checked={ov.start} 
+                      onChange={(e) => setOv({ ...ov, start: e.target.checked })}
+                      className={`w-4 h-4 rounded transition-colors ${
+                        darkMode 
+                          ? 'border-neutral-600 text-violet-500 focus:ring-violet-500/50' 
+                          : 'border-slate-300 text-violet-600 focus:ring-violet-200'
+                      }`}
+                    />
+                    <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>START-NEW</span>
                   </label>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <span className={`text-sm ${themeStyles.textMuted}`}>HA</span>
-                  <label className="inline-flex items-center gap-1">
-                    <input type="checkbox" checked={ov.ha} onChange={(e) => setOv({ ...ov, ha: e.target.checked })} />
+                <div className="col-span-1">
+                  <label className={`flex items-center gap-2 p-1 rounded transition-colors ${
+                    darkMode ? 'hover:bg-neutral-700/40' : 'hover:bg-slate-100'
+                  }`}>
+                    <input 
+                      type="checkbox" 
+                      checked={ov.ha} 
+                      onChange={(e) => setOv({ ...ov, ha: e.target.checked })}
+                      className={`w-4 h-4 rounded transition-colors ${
+                        darkMode 
+                          ? 'border-neutral-600 text-violet-500 focus:ring-violet-500/50' 
+                          : 'border-slate-300 text-violet-600 focus:ring-violet-200'
+                      }`}
+                    />
+                    <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>HA</span>
                   </label>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <span className={`text-sm ${themeStyles.textMuted}`}>WCF</span>
-                  <label className="inline-flex items-center gap-1">
-                    <input type="checkbox" checked={ov.wcf} onChange={(e) => setOv({ ...ov, wcf: e.target.checked })} />
+                <div className="col-span-1">
+                  <label className={`flex items-center gap-2 p-1 rounded transition-colors ${
+                    darkMode ? 'hover:bg-neutral-700/40' : 'hover:bg-slate-100'
+                  }`}>
+                    <input 
+                      type="checkbox" 
+                      checked={ov.wcf} 
+                      onChange={(e) => setOv({ ...ov, wcf: e.target.checked })}
+                      className={`w-4 h-4 rounded transition-colors ${
+                        darkMode 
+                          ? 'border-neutral-600 text-violet-500 focus:ring-violet-500/50' 
+                          : 'border-slate-300 text-violet-600 focus:ring-violet-200'
+                      }`}
+                    />
+                    <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>WCF</span>
                   </label>
                 </div>
-                <Btn
-                  variant="ghost"
-                  darkMode={darkMode}
-                  onClick={() => setOv({ Nnode: 0, Nap: 0, start: false, ha: false, node: true, ap: true, wcf: false })}
-                >
-                  {t(lang, 'clearOv')}
-                </Btn>
+                <div className="col-span-1 sm:col-span-3 lg:col-span-3">
+                  <Btn
+                    className="w-full"
+                    variant="ghost"
+                    darkMode={darkMode}
+                    onClick={() => setOv({ Nnode: 0, Nap: 0, start: false, ha: false, node: true, ap: true, wcf: false })}
+                  >
+                    {t(lang, 'clearOv')}
+                  </Btn>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <label className={`flex items-center gap-2 text-sm ${themeStyles.textMuted}`}>
-                  <input type="checkbox" checked={ov.node} onChange={(e) => setOv({ ...ov, node: e.target.checked })} />
-                  {t(lang, 'nodePacksDesc')}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <label className={`flex items-center gap-2 p-2 rounded transition-colors ${
+                  darkMode ? 'hover:bg-neutral-700/40' : 'hover:bg-slate-100'
+                }`}>
+                  <input 
+                    type="checkbox" 
+                    checked={ov.node} 
+                    onChange={(e) => setOv({ ...ov, node: e.target.checked })}
+                    className={`w-4 h-4 rounded transition-colors ${
+                      darkMode 
+                        ? 'border-neutral-600 text-violet-500 focus:ring-violet-500/50' 
+                        : 'border-slate-300 text-violet-600 focus:ring-violet-200'
+                    }`}
+                  />
+                  <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>{t(lang, 'nodePacksDesc')}</span>
                 </label>
-                <label className={`flex items-center gap-2 text-sm ${themeStyles.textMuted}`}>
-                  <input type="checkbox" checked={ov.ap} onChange={(e) => setOv({ ...ov, ap: e.target.checked })} />
-                  {t(lang, 'apPacksDesc')}
+                <label className={`flex items-center gap-2 p-2 rounded transition-colors ${
+                  darkMode ? 'hover:bg-neutral-700/40' : 'hover:bg-slate-100'
+                }`}>
+                  <input 
+                    type="checkbox" 
+                    checked={ov.ap} 
+                    onChange={(e) => setOv({ ...ov, ap: e.target.checked })}
+                    className={`w-4 h-4 rounded transition-colors ${
+                      darkMode 
+                        ? 'border-neutral-600 text-violet-500 focus:ring-violet-500/50' 
+                        : 'border-slate-300 text-violet-600 focus:ring-violet-200'
+                    }`}
+                  />
+                  <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>{t(lang, 'apPacksDesc')}</span>
                 </label>
               </div>
 
               {/* 自动拆包预览 */}
-              <div className={`grid grid-cols-2 gap-3 text-sm ${themeStyles.textMuted}`}>
+              <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm ${themeStyles.textMuted}`}>
                 <div className={`rounded-xl border p-3 transition-colors ${themeStyles.cardAlt}`}>
                   <div className={`font-medium mb-1 ${themeStyles.text}`}>{t(lang, 'nodePacks')}</div>
                   <div className={themeStyles.textMuted}>
@@ -949,7 +1041,7 @@ export default function App() {
           {/* 手动 */}
           {ovMode === "manual" && (
             <div className="space-y-3">
-              <div className="grid grid-cols-5 gap-3 items-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
                 <Field label={t(lang, 'nodeNeed')} darkMode={darkMode}>
                   <Input
                     type="number"
@@ -975,21 +1067,57 @@ export default function App() {
                     darkMode={darkMode}
                   />
                 </Field>
-                <label className={`inline-flex items-center gap-2 text-sm ${themeStyles.textMuted}`}>
-                  <input type="checkbox" checked={ovM.start} onChange={(e) => setOvM({ ...ovM, start: e.target.checked })} /> START-NEW
+                <label className={`flex items-center gap-2 p-1 rounded transition-colors ${
+                  darkMode ? 'hover:bg-neutral-700/40' : 'hover:bg-slate-100'
+                }`}>
+                  <input 
+                    type="checkbox" 
+                    checked={ovM.start} 
+                    onChange={(e) => setOvM({ ...ovM, start: e.target.checked })}
+                    className={`w-4 h-4 rounded transition-colors ${
+                      darkMode 
+                        ? 'border-neutral-600 text-violet-500 focus:ring-violet-500/50' 
+                        : 'border-slate-300 text-violet-600 focus:ring-violet-200'
+                    }`}
+                  />
+                  <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>START-NEW</span>
                 </label>
-                <label className={`inline-flex items-center gap-2 text-sm ${themeStyles.textMuted}`}>
-                  <input type="checkbox" checked={ovM.ha} onChange={(e) => setOvM({ ...ovM, ha: e.target.checked })} /> HA
+                <label className={`flex items-center gap-2 p-1 rounded transition-colors ${
+                  darkMode ? 'hover:bg-neutral-700/40' : 'hover:bg-slate-100'
+                }`}>
+                  <input 
+                    type="checkbox" 
+                    checked={ovM.ha} 
+                    onChange={(e) => setOvM({ ...ovM, ha: e.target.checked })}
+                    className={`w-4 h-4 rounded transition-colors ${
+                      darkMode 
+                        ? 'border-neutral-600 text-violet-500 focus:ring-violet-500/50' 
+                        : 'border-slate-300 text-violet-600 focus:ring-violet-200'
+                    }`}
+                  />
+                  <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>HA</span>
                 </label>
-                <label className={`inline-flex items-center gap-2 text-sm ${themeStyles.textMuted}`}>
-                  <input type="checkbox" checked={ovM.wcf} onChange={(e) => setOvM({ ...ovM, wcf: e.target.checked })} /> WCF
+                <label className={`flex items-center gap-2 p-1 rounded transition-colors ${
+                  darkMode ? 'hover:bg-neutral-700/40' : 'hover:bg-slate-100'
+                }`}>
+                  <input 
+                    type="checkbox" 
+                    checked={ovM.wcf} 
+                    onChange={(e) => setOvM({ ...ovM, wcf: e.target.checked })}
+                    className={`w-4 h-4 rounded transition-colors ${
+                      darkMode 
+                        ? 'border-neutral-600 text-violet-500 focus:ring-violet-500/50' 
+                        : 'border-slate-300 text-violet-600 focus:ring-violet-200'
+                    }`}
+                  />
+                  <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-slate-700'}`}>WCF</span>
                 </label>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 gap-4">
                 <div className={`rounded-xl border p-4 transition-colors ${themeStyles.cardAlt}`}>
                   <div className={`font-medium mb-3 ${themeStyles.text}`}>{t(lang, 'nodePacks')}</div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {PACK_SIZES.map(size => (
                       <Field key={size} label={`${size}包`} darkMode={darkMode}>
                         <Input
@@ -1013,7 +1141,7 @@ export default function App() {
 
                 <div className={`rounded-xl border p-4 transition-colors ${themeStyles.cardAlt}`}>
                   <div className={`font-medium mb-3 ${themeStyles.text}`}>{t(lang, 'apPacks')}</div>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     {PACK_SIZES.map(size => (
                       <Field key={size} label={`${size}包`} darkMode={darkMode}>
                         <Input
