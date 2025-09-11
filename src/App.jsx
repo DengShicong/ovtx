@@ -7,13 +7,14 @@ import {
   PointElement,
   LineElement,
   BarElement,
+  BarController,
   Filler,
   Tooltip,
   Legend,
 } from "chart.js";
 import { Chart } from "react-chartjs-2";
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Filler, Tooltip, Legend);
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, BarController, Filler, Tooltip, Legend);
 
 /* -------------------------- 工具 / 常量 -------------------------- */
 const YEARS = [1, 3, 5, 7];
