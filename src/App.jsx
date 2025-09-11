@@ -380,7 +380,7 @@ export default function App() {
     return sums;
   }, [terra, terraTable]);
 
-  /* OV 自动拆包（贪心） */
+  /* OV 自动拆包（最优组合） */
   const autoPacks = useMemo(() => {
     if (ovMode !== "auto") return { node: {}, ap: {} };
     let needNode = +ov.Nnode || 0;
@@ -389,22 +389,104 @@ export default function App() {
       needNode = Math.max(0, needNode - 10);
       needAP = Math.max(0, needAP - 10);
     }
-    const store = { node: {}, ap: {} };
-    const greedy = (need, enable, bucket) => {
-      if (!enable || need <= 0) return;
-      for (const s of PACK_SIZES) {
-        const c = Math.floor(need / s);
-        if (c > 0) {
-          bucket[s] = (bucket[s] || 0) + c;
-          need -= c * s;
+
+    // 最优组合算法（改进的贪心算法 + 大包优化）
+    const findOptimalCombination = (need, priceTable) => {
+      if (need <= 0) return {};
+      
+      // 贪心算法基础结果
+      const greedyBucket = {};
+      let remaining = need;
+      
+      // 从大到小尝试，确保满足需求
+      for (const size of PACK_SIZES) {
+        if (remaining >= size) {
+          const count = Math.floor(remaining / size);
+          if (count > 0) {
+            greedyBucket[size] = (greedyBucket[size] || 0) + count;
+            remaining -= count * size;
+          }
         }
       }
-      if (need > 0) bucket[10] = (bucket[10] || 0) + 1;
+      
+      // 如果还有剩余，用最小的包补齐
+      if (remaining > 0) {
+        const smallestSize = PACK_SIZES[PACK_SIZES.length - 1];
+        greedyBucket[smallestSize] = (greedyBucket[smallestSize] || 0) + 1;
+        remaining -= smallestSize;
+      }
+      
+      // 计算贪心算法的总成本
+      const calculateCost = (bucket) => {
+        return Object.entries(bucket).reduce((sum, [size, count]) => 
+          sum + (priceTable[size] * count), 0);
+      };
+      
+      const greedyCost = calculateCost(greedyBucket);
+      
+      // 检查是否有更优的单个大包选择
+      const alternatives = [];
+      
+      // 检查每个包大小，看是否用1个该包就能满足需求且成本更低
+      for (const size of PACK_SIZES) {
+        if (size >= need && priceTable[size] < greedyCost) {
+          alternatives.push({
+            bucket: { [size]: 1 },
+            cost: priceTable[size],
+            total: size
+          });
+        }
+      }
+      
+      // 检查两个包的组合（如100+500）
+      for (let i = 0; i < PACK_SIZES.length; i++) {
+        for (let j = i; j < PACK_SIZES.length; j++) {
+          const size1 = PACK_SIZES[i];
+          const size2 = PACK_SIZES[j];
+          const total = size1 + size2;
+          
+          if (total >= need) {
+            const combo = {};
+            if (size1 === size2) {
+              combo[size1] = 2;
+            } else {
+              combo[size1] = 1;
+              combo[size2] = 1;
+            }
+            
+            const comboCost = calculateCost(combo);
+            if (comboCost < greedyCost) {
+              alternatives.push({
+                bucket: combo,
+                cost: comboCost,
+                total: total
+              });
+            }
+          }
+        }
+      }
+      
+      // 如果有更优的选择，选择成本最低的
+      if (alternatives.length > 0) {
+        alternatives.sort((a, b) => a.cost - b.cost);
+        return alternatives[0].bucket;
+      }
+      
+      return greedyBucket;
     };
-    greedy(needNode, ov.node, store.node);
-    greedy(needAP, ov.ap, store.ap);
+
+    const store = { node: {}, ap: {} };
+    
+    if (ov.node && needNode > 0) {
+      store.node = findOptimalCombination(needNode, ovTable.Node);
+    }
+    
+    if (ov.ap && needAP > 0) {
+      store.ap = findOptimalCombination(needAP, ovTable.AP);
+    }
+    
     return store;
-  }, [ovMode, ov]);
+  }, [ovMode, ov, ovTable]);
 
   /* OV 金额 */
   const ovYearSums = useMemo(() => {
