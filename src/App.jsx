@@ -161,7 +161,7 @@ const CNY_OV = {
 /* -------------------------- 小组件 -------------------------- */
 const Seg = ({ value, onChange, items, darkMode = false }) => (
   <div className={`inline-flex rounded-full border p-1 transition-colors ${
-    darkMode ? 'bg-slate-800/50 border-slate-600/50' : 'bg-slate-100 border-slate-200'
+    darkMode ? 'bg-neutral-900/95 border-neutral-800/50' : 'bg-slate-100 border-slate-200'
   }`}>
     {items.map((it) => (
       <button
@@ -169,10 +169,10 @@ const Seg = ({ value, onChange, items, darkMode = false }) => (
         className={`px-3 py-1 rounded-full transition-colors ${
           value === it.value 
             ? darkMode 
-              ? "bg-violet-600/80 text-violet-100 font-semibold" 
+              ? "bg-violet-600/90 text-violet-50 font-semibold shadow-lg shadow-violet-500/20" 
               : "bg-violet-100 text-violet-700 font-semibold"
             : darkMode
-              ? "text-slate-300 hover:bg-slate-700/50"
+              ? "text-gray-400 hover:bg-neutral-800/80"
               : "text-slate-700"
         }`}
         onClick={() => onChange(it.value)}
@@ -183,10 +183,14 @@ const Seg = ({ value, onChange, items, darkMode = false }) => (
   </div>
 );
 
-const Card = ({ children, className = "" }) => (
+const Card = ({ children, className = "", glow = false, darkMode = false }) => (
   <motion.div
     layout
-    className={`border rounded-2xl shadow-sm transition-colors duration-300 ${className}`}
+    className={`border rounded-2xl shadow-sm transition-colors duration-300 relative ${
+      glow && darkMode 
+        ? 'border-neutral-700/50 shadow-lg shadow-neutral-900/30' 
+        : ''
+    } ${className}`}
     initial={{ opacity: 0, y: 8 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.18, ease: "easeOut" }}
@@ -207,7 +211,7 @@ const Input = ({ darkMode = false, ...props }) => (
     {...props}
     className={`h-10 w-full rounded-xl border px-3 outline-none transition-colors ${
       darkMode 
-        ? 'bg-slate-700/50 border-slate-600/50 text-slate-100 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20' 
+        ? 'bg-neutral-800/95 border-neutral-700/80 text-white focus:border-violet-400 focus:ring-2 focus:ring-violet-500/20' 
         : 'bg-white border-slate-200 text-slate-900 focus:border-violet-300 focus:ring-2 focus:ring-violet-100'
     } ${props.className || ""}`}
   />
@@ -216,9 +220,9 @@ const Input = ({ darkMode = false, ...props }) => (
 const Select = ({ children, darkMode = false, ...rest }) => (
   <select
     {...rest}
-    className={`h-10 w-full rounded-xl border px-3 pr-8 outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%23${darkMode ? 'CBD5E1' : '666'}%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%20111.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%20clip-rule%3D%22evenodd%22/%3E%3C/svg%3E')] bg-no-repeat bg-right-2 bg-[length:1.5rem] transition-colors ${
+    className={`h-10 w-full rounded-xl border px-3 pr-8 outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%23${darkMode ? '9CA3AF' : '666'}%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%20111.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%20clip-rule%3D%22evenodd%22/%3E%3C/svg%3E')] bg-no-repeat bg-right-2 bg-[length:1.5rem] transition-colors ${
       darkMode 
-        ? 'bg-slate-700/80 border-slate-600/60 text-slate-100 hover:bg-slate-600/90 hover:border-violet-500/40 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/30' 
+        ? 'bg-neutral-800/80 border-neutral-700/60 text-white hover:bg-neutral-700/90 hover:border-violet-500/40 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/30' 
         : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50 hover:border-violet-300 focus:border-violet-300 focus:ring-2 focus:ring-violet-100'
     }`}
   >
@@ -229,10 +233,10 @@ const Select = ({ children, darkMode = false, ...rest }) => (
 const Btn = ({ children, variant = "primary", darkMode = false, ...rest }) => {
   const cls = variant === "ghost"
     ? darkMode 
-      ? "bg-slate-700/60 hover:bg-slate-600/70 border border-slate-600/50 text-slate-200"
+      ? "bg-neutral-800/60 hover:bg-neutral-700/70 border border-neutral-700/50 text-gray-200"
       : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-50"
     : darkMode
-      ? "bg-violet-600/80 hover:bg-violet-500/90 text-violet-100"
+      ? "bg-violet-600/80 hover:bg-violet-500/90 text-violet-50"
       : "bg-violet-600 hover:bg-violet-700 text-white";
   return (
     <button
@@ -271,23 +275,23 @@ export default function App() {
   // 动态主题样式
   const themeStyles = {
     card: darkMode 
-      ? 'bg-slate-800/80 border-slate-600/60' 
-      : 'bg-white/90 border-slate-200',
+      ? 'bg-neutral-900/95 border-neutral-800/80 backdrop-blur-sm shadow-2xl shadow-black/50' 
+      : 'bg-white/95 border-slate-200 backdrop-blur-sm',
     cardAlt: darkMode 
-      ? 'bg-slate-700/60 border-slate-600/50' 
-      : 'bg-white/60 border-slate-200/60',
-    text: darkMode ? 'text-slate-100' : 'text-slate-900',
-    textMuted: darkMode ? 'text-slate-300' : 'text-slate-600',
-    textLight: darkMode ? 'text-slate-400' : 'text-slate-500',
+      ? 'bg-neutral-800/90 border-neutral-700/70 backdrop-blur-sm shadow-xl shadow-black/40' 
+      : 'bg-white/90 border-slate-200/60 backdrop-blur-sm',
+    text: darkMode ? 'text-white' : 'text-slate-900',
+    textMuted: darkMode ? 'text-gray-400' : 'text-slate-600',
+    textLight: darkMode ? 'text-gray-500' : 'text-slate-500',
     input: darkMode 
-      ? 'bg-slate-700/80 border-slate-600/60 text-slate-100 hover:bg-slate-600/90 hover:border-violet-500/40 focus:border-violet-400 focus:ring-violet-500/30' 
-      : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50 hover:border-violet-300 focus:border-violet-300 focus:ring-violet-100',
+      ? 'bg-neutral-800/95 border-neutral-700/80 text-white hover:bg-neutral-700/95 hover:border-violet-500/50 focus:border-violet-400 focus:ring-violet-500/30 backdrop-blur-sm shadow-lg shadow-black/30' 
+      : 'bg-white/95 border-slate-200 text-slate-900 hover:bg-slate-50 hover:border-violet-300 focus:border-violet-300 focus:ring-violet-100 backdrop-blur-sm',
     button: darkMode
-      ? 'bg-slate-700/70 hover:bg-slate-600/80 border-slate-600/60 text-slate-200 hover:border-violet-500/40'
-      : 'bg-white hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-violet-300',
+      ? 'bg-neutral-800/90 hover:bg-neutral-700/95 border-neutral-700/80 text-gray-200 hover:border-violet-500/50 backdrop-blur-sm shadow-lg shadow-black/30'
+      : 'bg-white/95 hover:bg-slate-50 border-slate-200 text-slate-700 hover:border-violet-300 backdrop-blur-sm',
     chartBg: darkMode
-      ? 'bg-gradient-to-br from-slate-800/70 to-slate-900/90'
-      : 'bg-gradient-to-br from-slate-50 to-white',
+      ? 'bg-neutral-900/98 backdrop-blur-sm shadow-2xl shadow-black/60'
+      : 'bg-gradient-to-br from-slate-50/90 to-white/95 backdrop-blur-sm',
   };
 
   /* 模板 */
@@ -431,7 +435,7 @@ export default function App() {
           borderWidth: 1.5,
           borderRadius: 8,
           borderSkipped: false,
-          barThickness: 30,
+          barThickness: 50,  // 增加柱子宽度从30到50
           yAxisID: 'y',
         },
         {
@@ -443,7 +447,7 @@ export default function App() {
           borderWidth: 1.5,
           borderRadius: 8,
           borderSkipped: false,
-          barThickness: 30,
+          barThickness: 50,  // 增加柱子宽度从30到50
           yAxisID: 'y',
         },
       ],
@@ -588,13 +592,13 @@ export default function App() {
   /* -------------------------- UI -------------------------- */
   return (
     <div className={`min-h-screen transition-colors duration-300 ${
-      darkMode ? 'bg-slate-900 text-slate-100' : 'bg-slate-50/60 text-slate-900'
+      darkMode ? 'bg-black text-white' : 'bg-slate-50 text-slate-900'
     }`}>
       {/* 顶部条 */}
-      <div className={`sticky top-0 z-20 backdrop-blur border-b transition-colors duration-300 ${
+      <div className={`sticky top-0 z-20 backdrop-blur-md border-b transition-colors duration-300 ${
         darkMode 
-          ? 'bg-slate-900/70 border-slate-700' 
-          : 'bg-white/70 border-slate-200'
+          ? 'bg-black/95 border-neutral-800/80 shadow-lg shadow-black/40' 
+          : 'bg-white/80 border-slate-200'
       }`}>
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-3">
           <div className="text-lg font-bold">{t(lang, 'title')}</div>
@@ -603,7 +607,7 @@ export default function App() {
               onClick={() => setDarkMode(!darkMode)}
               className={`p-2 rounded-full transition-colors ${
                 darkMode 
-                  ? 'bg-slate-800 hover:bg-slate-700 text-slate-300' 
+                  ? 'bg-neutral-900 hover:bg-neutral-800 text-gray-300 shadow-lg shadow-black/30 border border-neutral-800/50' 
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-600'
               }`}
               title={darkMode ? '切换到浅色模式' : '切换到深色模式'}
@@ -638,7 +642,7 @@ export default function App() {
         <div className="grid lg:grid-cols-[400px_1fr] gap-4">
           {/* 左：Terra & 模板 */}
           <div className="flex flex-col gap-4 h-full">
-            <Card className={`p-3 ${themeStyles.card}`}>
+            <Card className={`p-3 ${themeStyles.card}`} glow={darkMode} darkMode={darkMode}>
               <div className="flex flex-wrap gap-2 items-end">
                 <Select onChange={(e) => loadTpl(e.target.value)} defaultValue="" darkMode={darkMode}>
                   <option value="">{t(lang, 'selectTemplate')}</option>
@@ -653,7 +657,7 @@ export default function App() {
               </div>
             </Card>
 
-            <Card className={`p-4 flex-1 flex flex-col ${themeStyles.card}`}>
+            <Card className={`p-4 flex-1 flex flex-col ${themeStyles.card}`} glow={darkMode} darkMode={darkMode}>
               <div className="flex items-center justify-between">
                 <div className={`text-base font-semibold ${themeStyles.text}`}>{t(lang, 'terraCombo')}</div>
                 <label className={`inline-flex items-center gap-2 text-sm ${themeStyles.textMuted}`}>
@@ -715,7 +719,7 @@ export default function App() {
                       key={idx}
                       layout
                       className={`grid grid-cols-[64px,80px,80px,60px,36px] gap-2 items-center p-2 rounded-xl border transition-colors ${
-                        darkMode ? 'border-slate-600 bg-slate-700/30' : 'border-slate-200'
+                        darkMode ? 'border-neutral-700/50 bg-neutral-800/40' : 'border-slate-200'
                       }`}
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -727,9 +731,9 @@ export default function App() {
                         <select 
                           value={it.tier} 
                           onChange={(e) => setTerraItem(idx, { tier: e.target.value })}
-                          className={`h-8 w-full rounded-lg border px-2 pr-6 text-sm outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%23${darkMode ? 'CBD5E1' : '666'}%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%20111.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%20clip-rule%3D%22evenodd%22/%3E%3C/svg%3E')] bg-no-repeat bg-right-1 bg-[length:1rem] transition-colors ${
+                          className={`h-8 w-full rounded-lg border px-2 pr-6 text-sm outline-none appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%23${darkMode ? '9CA3AF' : '666'}%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%20111.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%20clip-rule%3D%22evenodd%22/%3E%3C/svg%3E')] bg-no-repeat bg-right-1 bg-[length:1rem] transition-colors ${
                             darkMode 
-                              ? 'bg-slate-700/80 border-slate-600/60 text-slate-100 hover:bg-slate-600/90 hover:border-violet-500/40 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/30' 
+                              ? 'bg-neutral-800/80 border-neutral-700/60 text-white hover:bg-neutral-700/90 hover:border-violet-500/40 focus:border-violet-400 focus:ring-2 focus:ring-violet-500/30' 
                               : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50 hover:border-violet-300 focus:border-violet-300 focus:ring-2 focus:ring-violet-100'
                           }`}
                         >
@@ -753,7 +757,7 @@ export default function App() {
 
                       <button
                         className={`h-8 w-8 rounded-lg border text-rose-500 hover:bg-rose-50 flex items-center justify-center transition-colors ${
-                          darkMode ? 'border-slate-600 hover:bg-rose-900/20' : 'border-slate-200 hover:bg-rose-50'
+                          darkMode ? 'border-neutral-700 hover:bg-rose-900/20' : 'border-slate-200 hover:bg-rose-50'
                         }`}
                         onClick={() => delTerraItem(idx)}
                         title="删除"
@@ -770,7 +774,7 @@ export default function App() {
           {/* 右：图表与统计 */}
           <div className="flex flex-col gap-4">
             {/* 价格与年期图表 */}
-            <Card className={`p-6 border ${themeStyles.chartBg} ${darkMode ? 'border-slate-700/60' : 'border-slate-200/60'}`}>
+            <Card className={`p-6 border ${themeStyles.chartBg} ${darkMode ? 'border-slate-700/60' : 'border-slate-200/60'}`} glow={darkMode} darkMode={darkMode}>
               <div className="flex items-center justify-between">
                 <div className={`text-lg font-semibold ${themeStyles.text}`}>{t(lang, 'priceAndYear')}</div>
                 <div className="flex items-center gap-2 text-sm">
@@ -835,7 +839,7 @@ export default function App() {
         </div>
 
         {/* 下半部分：OV2500 */}
-        <Card className={`p-4 ${themeStyles.card}`}>
+        <Card className={`p-4 ${themeStyles.card}`} glow={darkMode} darkMode={darkMode}>
           <div className="flex items-center justify-between mb-4">
             <div className={`text-base font-semibold ${themeStyles.text}`}>{t(lang, 'ov2500')}</div>
             <Seg
@@ -1047,6 +1051,6 @@ export default function App() {
           )}
         </Card>
       </div>
-    </div>
+      </div>
   );
 }
