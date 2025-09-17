@@ -260,6 +260,10 @@ export default function App() {
     width: typeof window !== 'undefined' ? window.innerWidth : 1024,
     height: typeof window !== 'undefined' ? window.innerHeight : 768,
   });
+  const [discounts, setDiscounts] = useState({
+    terra: 100,
+    ov2500: 100
+  });
 
   // 监听窗口大小变化
   useEffect(() => {
@@ -377,8 +381,12 @@ export default function App() {
         sums[y] += (terraTable[k] || 0) * (+it.qty || 0);
       });
     });
+    // Apply Terra discount
+    Object.keys(sums).forEach(year => {
+      sums[year] = sums[year] * (discounts.terra / 100);
+    });
     return sums;
-  }, [terra, terraTable]);
+  }, [terra, terraTable, discounts.terra]);
 
   /* OV 自动拆包（最优组合） */
   const autoPacks = useMemo(() => {
@@ -514,8 +522,10 @@ export default function App() {
         total += est * ovTable.WCF10;
       }
     }
+    // Apply OV2500 discount
+    total = total * (discounts.ov2500 / 100);
     return { 1: total, 3: total, 5: total, 7: total };
-  }, [ovMode, ov, ovM, autoPacks, ovTable]);
+  }, [ovMode, ov, ovM, autoPacks, ovTable, discounts.ov2500]);
 
   /* 统计卡片 */
   const mkVal = (v, years) => (sumMode === "avg" ? v / years : v);
@@ -894,14 +904,46 @@ export default function App() {
             <Card className={`p-6 border ${themeStyles.chartBg} ${darkMode ? 'border-slate-700/60' : 'border-slate-200/60'}`} glow={darkMode} darkMode={darkMode}>
               <div className="flex items-center justify-between">
                 <div className={`text-lg font-semibold ${themeStyles.text}`}>{t(lang, 'priceAndYear')}</div>
-                <div className="flex items-center gap-2 text-sm">
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-full bg-violet-500"></div>
-                    <span className={themeStyles.textMuted}>Terra</span>
+                <div className="flex flex-col gap-3 text-sm">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-violet-500"></div>
+                      <span className={themeStyles.textMuted}>Terra</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={discounts.terra}
+                        onChange={(e) => setDiscounts(prev => ({ ...prev, terra: parseInt(e.target.value) }))}
+                        className="w-24 h-1 rounded-lg cursor-pointer"
+                        style={{
+                          background: `linear-gradient(to right, #8b5cf6 0%, #8b5cf6 ${discounts.terra}%, ${darkMode ? '#374151' : '#e5e7eb'} ${discounts.terra}%, ${darkMode ? '#374151' : '#e5e7eb'} 100%)`
+                        }}
+                      />
+                      <span className={`text-xs ${themeStyles.textMuted} w-10 text-right font-mono`}>{discounts.terra}%</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-full bg-emerald-600"></div>
-                    <span className={themeStyles.textMuted}>OV2500</span>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full bg-emerald-600"></div>
+                      <span className={themeStyles.textMuted}>OV2500</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={discounts.ov2500}
+                        onChange={(e) => setDiscounts(prev => ({ ...prev, ov2500: parseInt(e.target.value) }))}
+                        className="w-24 h-1 rounded-lg cursor-pointer ov2500-slider"
+                        style={{
+                          background: `linear-gradient(to right, #10b981 0%, #10b981 ${discounts.ov2500}%, ${darkMode ? '#374151' : '#e5e7eb'} ${discounts.ov2500}%, ${darkMode ? '#374151' : '#e5e7eb'} 100%)`
+                        }}
+                      />
+                      <span className={`text-xs ${themeStyles.textMuted} w-10 text-right font-mono`}>{discounts.ov2500}%</span>
+                    </div>
                   </div>
                 </div>
               </div>
