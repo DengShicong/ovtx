@@ -922,7 +922,22 @@ export default function App() {
                           background: `linear-gradient(to right, #8b5cf6 0%, #8b5cf6 ${discounts.terra}%, ${darkMode ? '#374151' : '#e5e7eb'} ${discounts.terra}%, ${darkMode ? '#374151' : '#e5e7eb'} 100%)`
                         }}
                       />
-                      <span className={`text-xs ${themeStyles.textMuted} w-10 text-right font-mono`}>{discounts.terra}%</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={discounts.terra}
+                        onChange={(e) => {
+                          const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+                          setDiscounts(prev => ({ ...prev, terra: value }));
+                        }}
+                        className={`w-12 h-6 text-xs text-right font-mono border rounded px-1 outline-none transition-colors ${
+                          darkMode 
+                            ? 'bg-neutral-800/80 border-neutral-700/60 text-white focus:border-violet-400 focus:ring-1 focus:ring-violet-500/30' 
+                            : 'bg-white border-slate-300 text-slate-900 focus:border-violet-400 focus:ring-1 focus:ring-violet-100'
+                        }`}
+                      />
+                      <span className="text-xs text-gray-500">%</span>
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-4">
@@ -942,7 +957,22 @@ export default function App() {
                           background: `linear-gradient(to right, #10b981 0%, #10b981 ${discounts.ov2500}%, ${darkMode ? '#374151' : '#e5e7eb'} ${discounts.ov2500}%, ${darkMode ? '#374151' : '#e5e7eb'} 100%)`
                         }}
                       />
-                      <span className={`text-xs ${themeStyles.textMuted} w-10 text-right font-mono`}>{discounts.ov2500}%</span>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={discounts.ov2500}
+                        onChange={(e) => {
+                          const value = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+                          setDiscounts(prev => ({ ...prev, ov2500: value }));
+                        }}
+                        className={`w-12 h-6 text-xs text-right font-mono border rounded px-1 outline-none transition-colors ${
+                          darkMode 
+                            ? 'bg-neutral-800/80 border-neutral-700/60 text-white focus:border-violet-400 focus:ring-1 focus:ring-violet-500/30' 
+                            : 'bg-white border-slate-300 text-slate-900 focus:border-violet-400 focus:ring-1 focus:ring-violet-100'
+                        }`}
+                      />
+                      <span className="text-xs text-gray-500">%</span>
                     </div>
                   </div>
                 </div>
