@@ -905,6 +905,9 @@ export default function App() {
               <div className="flex items-center justify-between">
                 <div className={`text-lg font-semibold ${themeStyles.text}`}>{t(lang, 'priceAndYear')}</div>
                 <div className="flex flex-col gap-3 text-sm">
+                  <div className={`text-xs font-medium text-center ${themeStyles.textMuted}`}>
+                    {lang === "cpl" ? "则扣率" : "Discount"}
+                  </div>
                   <div className="flex items-center justify-between gap-4">
                     <div className="flex items-center gap-2">
                       <div className="w-3 h-3 rounded-full bg-violet-500"></div>
